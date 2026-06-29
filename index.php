@@ -400,7 +400,7 @@ if ($method == 'GET' && $path == '/posts') {
 <h2>게시글 작성</h2>
 
 <?php if (user_id()): ?>
-    <form method="post" action="/board/posts">
+    <form method="post" action="/board/posts" enctype="multipart/form-data">
         <input type="hidden" name="board_id" value="<?= $board_id ?>">
 
         <p>
@@ -411,6 +411,11 @@ if ($method == 'GET' && $path == '/posts') {
         <p>
             본문<br>
             <textarea name="content" rows="5"></textarea>
+        </p>
+
+        <p>
+            파일 첨부<br>
+            <input type="file" name="upload_file">
         </p>
 
         <button type="submit">작성</button>
@@ -455,10 +460,15 @@ if ($method == 'POST' && $path == '/posts') {
         VALUES ($board_id, '$title', '$content', $author_id)
     ");
 
-    header('Location: /board/posts?board_id=' . $board_id);
+    $post_id = $conn->insert_id;
+
+    if (!empty($_FILES['upload_file']['name'])) {
+        save_file($post_id);
+    }
+
+    header('Location: /board/posts/' . $post_id);
     exit;
 }
-
 /*
     GET /posts/:id
 */
